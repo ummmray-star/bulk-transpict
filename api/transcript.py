@@ -1,29 +1,32 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import os
 import re
 from urllib.parse import urlparse, parse_qs
 
+import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import (
     NoTranscriptFound,
     TranscriptsDisabled,
     VideoUnavailable,
 )
-from youtube_transcript_api.proxies import WebshareProxyConfig
+
+# Mimic YouTube Android app to avoid cloud IP blocking
+_ANDROID_UA = (
+    "com.google.android.youtube/19.09.37 (Linux; U; Android 14; en_US) gzip"
+)
 
 
 def _make_api() -> YouTubeTranscriptApi:
-    username = os.environ.get("WEBSHARE_PROXY_USERNAME", "")
-    password = os.environ.get("WEBSHARE_PROXY_PASSWORD", "")
-    if username and password:
-        return YouTubeTranscriptApi(
-            proxies=WebshareProxyConfig(
-                proxy_username=username,
-                proxy_password=password,
-            )
-        )
-    return YouTubeTranscriptApi()
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": _ANDROID_UA,
+        "X-YouTube-Client-Name": "3",
+        "X-YouTube-Client-Version": "19.09.37",
+        "Origin": "https://www.youtube.com",
+        "Referer": "https://www.youtube.com/",
+    })
+    return YouTubeTranscriptApi(http_client=session)
 
 
 def extract_video_id(url: str) -> str | None:
