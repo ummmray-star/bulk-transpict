@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 import json
+import os
 import re
 from urllib.parse import urlparse, parse_qs
 
@@ -9,6 +10,20 @@ from youtube_transcript_api._errors import (
     TranscriptsDisabled,
     VideoUnavailable,
 )
+from youtube_transcript_api.proxies import WebshareProxyConfig
+
+
+def _make_api() -> YouTubeTranscriptApi:
+    username = os.environ.get("WEBSHARE_PROXY_USERNAME", "")
+    password = os.environ.get("WEBSHARE_PROXY_PASSWORD", "")
+    if username and password:
+        return YouTubeTranscriptApi(
+            proxies=WebshareProxyConfig(
+                proxy_username=username,
+                proxy_password=password,
+            )
+        )
+    return YouTubeTranscriptApi()
 
 
 def extract_video_id(url: str) -> str | None:
@@ -39,7 +54,7 @@ def extract_video_id(url: str) -> str | None:
 
 
 def fetch_transcript(video_id: str) -> dict:
-    api = YouTubeTranscriptApi()
+    api = _make_api()
     transcript_list = api.list(video_id)
 
     # Try English first, then any language
