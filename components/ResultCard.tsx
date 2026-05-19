@@ -20,20 +20,40 @@ export default function ResultCard({ job, index }: Props) {
   };
 
   if (job.status === "error") {
+    const isDisabled =
+      job.error?.toLowerCase().includes("disabled") ||
+      job.error?.toLowerCase().includes("no transcript") ||
+      job.error?.toLowerCase().includes("not available");
+
     return (
-      <div className="glass rounded-2xl p-4 border border-red-500/20">
+      <div className={`glass rounded-2xl p-4 border ${isDisabled ? "border-amber-500/20" : "border-red-500/20"}`}>
         <div className="flex items-start gap-3">
-          <div className="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center shrink-0 mt-0.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
+            isDisabled ? "bg-amber-500/15 text-amber-400" : "bg-red-500/15 text-red-400"
+          }`}>
+            {isDisabled ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-red-400 mb-0.5">#{index + 1} — Error</p>
+            <p className={`text-xs font-semibold mb-0.5 ${isDisabled ? "text-amber-400" : "text-red-400"}`}>
+              #{index + 1} — {isDisabled ? "No Transcript Available" : "Error"}
+            </p>
             <p className="text-xs text-[#94a3b8] break-all truncate">{job.url}</p>
-            <p className="text-xs text-red-300 mt-1">{job.error}</p>
+            <p className={`text-xs mt-1 ${isDisabled ? "text-amber-300/80" : "text-red-300"}`}>
+              {isDisabled
+                ? "This video has transcripts disabled. This is common for Shorts and videos without captions."
+                : job.error}
+            </p>
           </div>
         </div>
       </div>

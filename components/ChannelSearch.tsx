@@ -15,6 +15,7 @@ export interface VideoResult {
   url: string;
   thumbnail: string;
   duration: string;
+  isShort: boolean;
 }
 
 export default function ChannelSearch({ onResults }: Props) {

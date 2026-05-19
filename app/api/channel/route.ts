@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       url: `https://www.youtube.com/watch?v=${v.id}`,
       thumbnail: v.thumbnail?.url ?? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`,
       duration: v.durationFormatted ?? "",
+      isShort: Boolean((v as unknown as { shorts?: boolean }).shorts),
     }));
 
     return Response.json({
